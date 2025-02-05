@@ -3,6 +3,10 @@ export default {
     localStorage.setItem('user', JSON.stringify(user))
     state.user = user
   },
+  setPdsJwt(state, pdsJwt) {
+    localStorage.setItem('pdsJwt', JSON.stringify(pdsJwt))
+    state.pdsJwt = pdsJwt
+  },
   setQrImage(state, val) {
     state.qrImage = val
   },

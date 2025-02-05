@@ -52,6 +52,9 @@
                         :dense="dense"
                       />
                     </div>
+                    <div class="d-flex justify-content-center q-mt-sm">
+                      <q-input outlined v-model="email" label="Email" :rules="emailRules" stack-label :dense="dense" />
+                    </div>
                     <div class="d-flex justify-content-center q-mb-md q-mt-sm">
                       <q-btn
                         label="Create"
@@ -122,6 +125,7 @@ export default {
       authType: 1,
       allowCreate: false,
       cantRegister: false,
+      emailRules: [(v) => (v && /^[^@]+@\w+(\.\w+)+\w$/.test(v)) || 'Email is required'],
     }
   },
   created() {
@@ -179,10 +183,7 @@ export default {
         return
       }
       this.$api
-        .post(
-          '/auth/register-finish?sessionKey=' + sessionKey + '&dispName=' + this.displayName + '&email=' + this.email,
-          asseResp
-        )
+        .post('/auth/register-finish?sessionKey=' + sessionKey + '&email=' + this.email, asseResp)
         .then((res) => {
           this.setLogin(res)
           this.$router.push({ path: '/' })
@@ -194,6 +195,9 @@ export default {
         })
     },
     registerUserPasskey() {
+      if (!this.isValidEmail(this.email)) {
+        return
+      }
       this.loading = true
       this.$api
         .post('/auth/register-start?username=' + this.username, {})
@@ -220,13 +224,18 @@ export default {
         })
     },
     registerWithPassword() {
-      if (!this.isValidPassword(this.password) || !this.isValidUsername(this.username)) {
+      if (
+        !this.isValidPassword(this.password) ||
+        !this.isValidUsername(this.username) ||
+        !this.isValidEmail(this.email)
+      ) {
         return
       }
       this.$store
         .dispatch('user/register', {
           username: this.username,
           password: this.password,
+          email: this.email,
         })
         .then((res) => {
           this.$q.notify({
@@ -268,6 +277,9 @@ export default {
     },
     isValidUsername(value) {
       return value && value.length > 0
+    },
+    isValidEmail(value) {
+      return value && /^[^@]+@\w+(\.\w+)+\w$/.test(value)
     },
     isValidPassword(value) {
       return value && value.length >= 6

@@ -10,6 +10,7 @@ export default {
       localStorage.setItem('token', data.token)
       localStorage.setItem('loginType', data.loginType)
       commit('setUser', data.userInfo)
+      commit('setPdsJwt', data.pdsJwt)
       commit('setAuthenticated', true)
       return { data }
     } catch (error) {
@@ -21,6 +22,7 @@ export default {
     localStorage.setItem('token', data.token)
     localStorage.setItem('loginType', data.loginType)
     commit('setUser', data.userInfo)
+    commit('setPdsJwt', data.pdsJwt)
     commit('setAuthenticated', true)
   },
   async register({ commit }, user) {
