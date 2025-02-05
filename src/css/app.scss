@@ -365,12 +365,12 @@ input:-webkit-autofill:active {
   font-size: 19px;
 }
 .after-input-icon {
-  position: relative;
-  padding-right: 10px;
-  height: 100%;
-  z-index: 100;
-  font-size: 25px;
+  height: 100% !important;
   color: $primary;
+}
+
+.has-icon-input .q-field__marginal {
+  height: 100%;
 }
 
 * {
@@ -441,7 +441,7 @@ a {
   overflow-y: auto;
   float: left;
   margin: 0 auto;
-  width: 60%;
+  width: 100%;
 }
 .login .container {
   width: 500px;
@@ -865,7 +865,7 @@ a {
   .paid-area-value {
     width: 82%;
   }
-  
+
   .bulk-pay-dialog {
     width: 60vw;
     max-width: 90vw !important;
@@ -916,7 +916,7 @@ a {
   .rate-area {
     margin-top: 2px;
   }
-  
+
   .bulk-pay-dialog {
     width: 95vw;
     max-width: 95vw !important;
@@ -996,6 +996,11 @@ a {
   cursor: pointer;
 }
 
+.blue-link {
+  color: #1ea0d3 !important;
+  cursor: pointer;
+}
+
 .underline-link {
   color: #1ea0d3 !important;
   text-decoration: underline !important;
@@ -1042,7 +1047,7 @@ a {
 
 // .version-info {
 //   position: absolute;
-//   top: 85vh; 
+//   top: 85vh;
 //   left: 10px;
 //   width: calc(100% - 20px);
 // }
@@ -1050,25 +1055,25 @@ a {
 
 .version-info {
   color: #333;
-  font-size: 14px; 
+  font-size: 14px;
   padding: 10px 15px;
-  text-align: center; 
+  text-align: center;
   margin-top: auto;
 }
 .fixed-version {
-  position: fixed; 
-  bottom: 10px;    
-  left: 50px;      
-  z-index: 1000; 
+  position: fixed;
+  bottom: 10px;
+  left: 50px;
+  z-index: 1000;
 }
 .status-column {
   padding-left: 100px;
 }
 .header-container {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   position: relative;
-  
+
 }
 .total-unpaid {
   margin-top: 5px;
@@ -1086,9 +1091,9 @@ a {
   box-shadow: none !important;
 }
 .q-menu-card{
-  min-width: 30px; 
-  width: 100px; 
-  max-height: 70px; 
+  min-width: 30px;
+  width: 100px;
+  max-height: 70px;
   overflow: hidden;
 }
 .q-menu-custom .q-menu-card {
@@ -1097,11 +1102,11 @@ a {
 }
 
 .q-menu-card-section{
-  display: flex; 
-  justify-content: center; 
+  display: flex;
+  justify-content: center;
   align-items: center;
-  padding: 4px; 
-  max-height: 50px; 
+  padding: 4px;
+  max-height: 50px;
   height: 40px;
   overflow: hidden;
   box-shadow: none !important;

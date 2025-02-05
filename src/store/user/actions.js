@@ -7,12 +7,10 @@ export default {
   async login({ commit }, payload) {
     try {
       const data = await api.post('/auth/login', payload)
-      if (!data.otp) {
-        localStorage.setItem('token', data.token)
-        localStorage.setItem('loginType', data.loginType)
-        commit('setUser', data.userInfo)
-        commit('setAuthenticated', true)
-      }
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('loginType', data.loginType)
+      commit('setUser', data.userInfo)
+      commit('setAuthenticated', true)
       return { data }
     } catch (error) {
       return { error }

@@ -9,22 +9,67 @@
                 <div class="container justify-center">
                   <div>
                     <q-card-section class="q-pa-lg login-form">
-                      <p class="text-h5 text-primary text-center"><b>Sign In</b></p>
-                      <p class="login-subtitle text-primary text-center q-mt-sm">Sign in with passkey</p>
-                      <div class="d-flex justify-content-center q-mb-md q-mt-sm">
-                        <q-btn
-                          label="Sign in"
-                          color="primary"
-                          class="text-center"
-                          :loading="signBtnLoading"
-                          @click="openPasskeyMgr()"
+                      <div class="d-flex justify-content-center">
+                        <q-avatar>
+                          <img src="../assets/social.png" />
+                        </q-avatar>
+                      </div>
+                      <p class="text-h5 text-primary text-center q-mt-sm">
+                        <b>{{ usePassword ? 'Login with password' : 'Login with passkey' }}</b>
+                      </p>
+                      <div class="d-flex justify-content-center q-mt-sm" v-if="usePassword">
+                        <q-input
+                          outlined
+                          v-model="username"
+                          label="Username"
+                          stack-label
+                          :dense="dense"
+                          :rules="usernameRules"
                         />
                       </div>
-                      <q-card class="col" flat bordered> </q-card>
-                      <div class="text-grey-3 q-mt-md row justify-between">
-                        <router-link class="link text-primary underline-link" to="/register"
-                          >Create Account</router-link
-                        >
+                      <div class="d-flex justify-content-center q-mt-sm" v-if="usePassword">
+                        <q-input
+                          outlined
+                          v-model="password"
+                          type="password"
+                          label="Password"
+                          stack-label
+                          :dense="dense"
+                          :rules="passwordRules"
+                        />
+                      </div>
+                      <div class="d-flex justify-content-center q-mb-md q-mt-sm">
+                        <q-btn
+                          label="Login"
+                          color="primary"
+                          class="text-center"
+                          :icon="usePassword ? 'keyboard' : 'fingerprint'"
+                          :disable="cantLogin && usePassword"
+                          :loading="signBtnLoading"
+                          @click="usePassword ? goLogin() : openPasskeyMgr()"
+                        />
+                      </div>
+                      <div class="text-grey-3 q-mt-md justify-content-center d-flex">
+                        <div>
+                          <div class="text-center">
+                            <q-icon
+                              :name="usePassword ? 'fingerprint' : 'keyboard'"
+                              size="sm"
+                              class="q-mr-sm blue-link"
+                            />
+                            <a class="link blue-link" @click.stop.prevent="loginWithPassword">{{
+                              usePassword ? 'Login With Passkey' : 'Login With Password'
+                            }}</a>
+                          </div>
+                          <div class="text-center">
+                            <q-icon name="app_registration" size="sm" class="q-mr-sm blue-link" />
+                            <router-link
+                              class="link blue-link"
+                              :to="usePassword ? '/register?type=password' : '/register?type=passkey'"
+                              >Signup</router-link
+                            >
+                          </div>
+                        </div>
                       </div>
                     </q-card-section>
                   </div>
@@ -52,9 +97,17 @@ export default {
       password: '',
       error: null,
       isPwd: true,
+      usePassword: false,
       msg: [],
+      cantLogin: false,
       signBtnLoading: false,
+      usernameRules: [(v) => (v && v.length > 0) || 'Username is required'],
+      passwordRules: [(v) => (v && v.length > 0) || 'Password is required'],
     }
+  },
+  created() {
+    const router = this.$route.query.type
+    this.usePassword = router == 'password'
   },
   computed: {
     ...mapGetters({
@@ -70,13 +123,13 @@ export default {
       const { error, data } = await this.login({
         username: this.username,
         password: this.password,
-        loginType: this.loginType,
       })
       if (error) {
         this.error = error.message
+        responseError(error)
         return
       }
-      this.$router.push({ path: '/home' })
+      this.$router.push({ path: '/' })
     },
     validateRequiredField(name, value) {
       if (value && value.length > 0) {
@@ -111,13 +164,6 @@ export default {
           responseError(err)
         })
     },
-    loginWithOldAccount() {
-      if (this.loginType == 0) {
-        this.loginType = 1
-      } else {
-        this.loginType = 0
-      }
-    },
     async handlerLoginFinish(opts, sessionKey, startConditionalUI) {
       let asseResp
       try {
@@ -138,15 +184,22 @@ export default {
           responseError(err)
         })
     },
+    loginWithPassword() {
+      this.usePassword = !this.usePassword
+      const queryChange = this.usePassword ? 'password' : 'passkey'
+      this.$router.replace({ query: { type: queryChange } })
+    },
   },
   watch: {
     username(value) {
       this.username = value
       this.validateRequiredField('username', value)
+      this.cantLogin = !this.username || this.username === '' || !this.password || this.password === ''
     },
     password(value) {
       this.password = value
       this.validateRequiredField('password', value)
+      this.cantLogin = !this.username || this.username === '' || !this.password || this.password === ''
     },
   },
 }

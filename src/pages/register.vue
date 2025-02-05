@@ -8,70 +8,82 @@
               <div class="flex flex-center q-mx-auto window-height">
                 <div class="container justify-center">
                   <q-card-section class="q-pa-lg login-form">
-                    <p class="text-h5 text-primary text-center"><b>Create Account</b></p>
-                    <p class="login-subtitle text-primary text-center">Please fill register information below</p>
-                    <q-form class="form-area" @submit="register">
-                      <!-- begin username input -->
-                      <div class="inputContainer">
-                        <input
-                          id="username_id"
-                          v-model="username"
-                          type="text"
-                          class="input"
-                          placeholder="Username"
-                          @blur="checkingDestination"
-                          required
-                        />
-                        <label for="username_id" class="label">
-                          <q-icon name="person" class="input-icon" />
-                          <span class="input-label q-ml-xs">Username</span>
-                        </label>
+                    <div class="d-flex justify-content-center">
+                      <q-avatar>
+                        <img src="../assets/social.png" />
+                      </q-avatar>
+                    </div>
+                    <p class="text-h5 text-primary text-center q-mt-sm">
+                      <b>{{ usePassword ? 'Signup with password' : 'Signup with passkey' }}</b>
+                    </p>
+                    <div>
+                      <div class="d-flex justify-content-center q-mt-sm">
+                        <div>
+                          <div>
+                            <q-input
+                              outlined
+                              v-model="username"
+                              label="Username"
+                              class="has-icon-input"
+                              stack-label
+                              @focus="onUsernameFocus"
+                              @blur="onUsernameBlur"
+                              @update:model-value="onUsernameChange"
+                              :dense="dense"
+                            >
+                              <template v-slot:append v-if="!usePassword">
+                                <q-btn round dense flat icon="refresh" @click="refreshRandomUsername" />
+                              </template>
+                            </q-input>
+                          </div>
+                          <div v-if="!notUseRandomUsername && username != ''">
+                            <p>Randomly generated</p>
+                          </div>
+                        </div>
                       </div>
-                      <div class="between-area">
-                        <span class="text-accent msg-error" v-if="msg.username">{{ msg.username }}</span>
+                    </div>
+                    <div class="d-flex justify-content-center q-mt-sm" v-if="usePassword">
+                      <q-input
+                        outlined
+                        v-model="password"
+                        type="password"
+                        label="Password"
+                        stack-label
+                        :dense="dense"
+                      />
+                    </div>
+                    <div class="d-flex justify-content-center q-mb-md q-mt-sm">
+                      <q-btn
+                        label="Create"
+                        color="primary"
+                        class="text-center"
+                        icon="app_registration"
+                        :loading="loading"
+                        :disable="!canRegister()"
+                        @click="usePassword ? registerWithPassword() : registerUserPasskey()"
+                      />
+                    </div>
+                    <div class="text-grey-3 q-mt-md justify-content-center d-flex">
+                      <div>
+                        <div class="text-center">
+                          <q-icon
+                            :name="usePassword ? 'fingerprint' : 'keyboard'"
+                            size="sm"
+                            class="q-mr-sm blue-link"
+                          />
+                          <a class="link blue-link" @click.stop.prevent="signupWithPassword">{{
+                            usePassword ? 'Signup With Passkey' : 'Signup With Password'
+                          }}</a>
+                        </div>
+                        <div class="text-center">
+                          <q-icon name="undo" size="sm" class="q-mr-sm blue-link" />
+                          <router-link
+                            class="link blue-link"
+                            :to="usePassword ? '/login?type=password' : '/login?type=passkey'"
+                            >Back to login</router-link
+                          >
+                        </div>
                       </div>
-                      <!-- end username input -->
-                      <!-- begin displayname/company name input -->
-                      <div class="inputContainer">
-                        <input
-                          id="display_name_id"
-                          v-model="displayName"
-                          type="text"
-                          class="input"
-                          placeholder="Your Display Name (optional)"
-                        />
-                        <label for="display_name_id" class="label">
-                          <q-icon name="badge" class="input-icon" />
-                          <span class="input-label q-ml-xs">Display Name/Company Name (optional)</span>
-                        </label>
-                      </div>
-                      <div class="between-area"></div>
-                      <!-- end displayname/company name input -->
-                      <!-- begin email input -->
-                      <div class="inputContainer">
-                        <input
-                          id="email_id"
-                          v-model="email"
-                          type="text"
-                          class="input"
-                          placeholder="Your email (optional)"
-                        />
-                        <label for="email_id" class="label">
-                          <q-icon name="mail" class="input-icon" />
-                          <span class="input-label q-ml-xs">Email (optional)</span></label
-                        >
-                      </div>
-                      <div class="between-area">
-                        <span class="text-accent msg-error" v-if="msg.email">{{ msg.email }}</span>
-                      </div>
-                      <!-- end password Confirmation input -->
-                      <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
-                      <q-btn label="Create" type="submit" color="primary" :loading="loading" :disable="!allowCreate" />
-                    </q-form>
-                    <q-card class="col" flat bordered> </q-card>
-                    <div class="text-grey-3 q-mt-md row justify-between">
-                      <p>Already have an account?</p>
-                      <router-link class="link text-primary" to="/login">Sign in</router-link>
                     </div>
                   </q-card-section>
                 </div>
@@ -97,21 +109,65 @@ export default {
     return {
       username: '',
       displayName: '',
+      randomUsername: '',
+      notUseRandomUsername: false,
       email: '',
       password: '',
       passwordCfm: '',
+      usePassword: false,
       isPwd: true,
       loading: false,
       error: null,
       msg: [],
       authType: 1,
       allowCreate: false,
+      cantRegister: false,
+    }
+  },
+  created() {
+    const router = this.$route.query.type
+    this.usePassword = router == 'password'
+    if (this.randomUsername == '') {
+      this.createRandomUsername()
     }
   },
   methods: {
     ...mapActions({
       setLogin: 'user/setLogin',
     }),
+    async createRandomUsername() {
+      this.$api
+        .get('/auth/gen-random-username')
+        .then((res) => {
+          if (!res.error) {
+            const result = JSON.parse(res.data)
+            this.randomUsername = result.username
+            if (!this.notUseRandomUsername) {
+              this.username = this.randomUsername
+            }
+          }
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    refreshRandomUsername() {
+      this.createRandomUsername()
+    },
+    onUsernameFocus() {
+      if (!this.notUseRandomUsername) {
+        this.username = ''
+      }
+    },
+    onUsernameBlur() {
+      if (!this.notUseRandomUsername || this.username == '') {
+        this.username = this.randomUsername
+      }
+    },
+    onUsernameChange(value) {
+      this.username = value
+      this.notUseRandomUsername = this.username && this.username != ''
+    },
     async handlerFinishRegistration(options, sessionKey) {
       let asseResp
       try {
@@ -163,42 +219,28 @@ export default {
           responseError(err)
         })
     },
-    register() {
-      if (!this.isValidUsername(this.username) || !this.isValidEmail(this.email)) {
-        return
-      }
-      if (this.authType == 1) {
-        this.registerUserPasskey()
-        return
-      }
-      if (!this.isValidPassword(this.password) || !this.isValidPasswordCfm(this.passwordCfm)) {
+    registerWithPassword() {
+      if (!this.isValidPassword(this.password) || !this.isValidUsername(this.username)) {
         return
       }
       this.$store
         .dispatch('user/register', {
           username: this.username,
           password: this.password,
-          ...(this.displayName && { displayName: this.displayName }),
-          ...(this.email && { email: this.email }),
         })
-        .then(() => {
+        .then((res) => {
           this.$q.notify({
-            message: 'Your account was created. You will now be redirected to the login page.',
+            message: 'Your account was created. You are logging in with a new account',
             color: 'positive',
             icon: 'check',
           })
-          this.$router.push({ path: '/login' })
+          this.setLogin(res)
+          this.$router.push({ path: '/' })
         })
         .catch((error) => {
           this.error = error.response ? error.response.data.message : error.message
+          responseError(error)
         })
-    },
-    checkingDestination($e) {
-      // checking
-      let status = DESTINATION_CHECK_CHECKING
-      this.msg['username'] = ''
-      this.allowCreate = true
-      status = DESTINATION_CHECK_DONE
     },
     cancelRegisterUser(sessionKey) {
       this.$api
@@ -224,49 +266,31 @@ export default {
       }
       this.msg['password'] = 'Password must be at least 6 characters. Please re-enter your password'
     },
-    validateEmail(value) {
-      if (this.isValidEmail(value)) {
-        this.msg['email'] = ''
-        return
-      }
-      this.msg['email'] = 'Please enter a valid email address'
-    },
-    validatePasswordConfirm(value) {
-      if (this.isValidPasswordCfm(value)) {
-        this.msg['passwordCfm'] = ''
-        return
-      }
-      this.msg['passwordCfm'] = 'Password confirmation does not match'
-    },
-    isValidEmail(value) {
-      return !value || (value && /^[^@]+@\w+(\.\w+)+\w$/.test(value))
-    },
     isValidUsername(value) {
       return value && value.length > 0
     },
     isValidPassword(value) {
       return value && value.length >= 6
     },
+    canRegister() {
+      return (
+        (this.usePassword && this.isValidUsername(this.username) && this.isValidPassword(this.password)) ||
+        (!this.usePassword && this.isValidUsername(this.username))
+      )
+    },
     isValidPasswordCfm(value) {
       return !value || (value && value === this.password)
     },
+    signupWithPassword() {
+      this.usePassword = !this.usePassword
+      const queryChange = this.usePassword ? 'password' : 'passkey'
+      this.$router.replace({ query: { type: queryChange } })
+    },
   },
   watch: {
-    username(value) {
-      this.username = value
-      this.validateUsername(value)
-    },
     password(value) {
       this.password = value
       this.validatePasswordField(value)
-    },
-    email(value) {
-      this.email = value
-      this.validateEmail(value)
-    },
-    passwordCfm(value) {
-      this.passwordCfm = value
-      this.validatePasswordConfirm(value)
     },
   },
 }
