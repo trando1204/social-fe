@@ -1033,7 +1033,7 @@ a {
   padding-top: 2px;
 }
 
-.search-user-select .q-select__dropdown-icon{
+.search-user-select .q-select__dropdown-icon {
   display: none;
 }
 
@@ -1051,7 +1051,6 @@ a {
 //   left: 10px;
 //   width: calc(100% - 20px);
 // }
-
 
 .version-info {
   color: #333;
@@ -1073,24 +1072,23 @@ a {
   display: flex;
   flex-direction: column;
   position: relative;
-
 }
 .total-unpaid {
   margin-top: 5px;
   font-size: medium;
 }
-.total-amount{
+.total-amount {
   font-weight: bold;
 }
 
-.q-menu-custom{
+.q-menu-custom {
   top: -15px;
   height: 30px;
   overflow: hidden;
   margin-right: 20px;
   box-shadow: none !important;
 }
-.q-menu-card{
+.q-menu-card {
   min-width: 30px;
   width: 100px;
   max-height: 70px;
@@ -1101,7 +1099,7 @@ a {
   border: none !important;
 }
 
-.q-menu-card-section{
+.q-menu-card-section {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1111,10 +1109,10 @@ a {
   overflow: hidden;
   box-shadow: none !important;
 }
-.title-lastSeen{
+.title-lastSeen {
   font-size: 16px;
 }
-.btn-lastSeen{
+.btn-lastSeen {
   width: 100px;
   margin-left: -10px;
   margin-right: 40px;
@@ -1122,5 +1120,57 @@ a {
 @media (max-width: 959px) {
   .title-lastSeen {
     display: none;
+  }
+}
+.new-post-btn {
+  margin-left: 20px;
+  margin-top: 15px;
+  border-radius: 10px;
+  padding: 10px 15px;
+}
+
+.textlink,
+.textlink--icon,
+.textlink--underline {
+  color: $link;
+  cursor: pointer;
+  line-height: 1.25;
+
+  & > .svg-icon {
+    fill: $link;
+  }
+
+  & > span {
+    line-height: 1.25;
+  }
+}
+
+.textlink {
+  &:focus > span,
+  &:hover > span {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+}
+
+.textlink--icon {
+  display: inline-flex;
+  align-items: center;
+  grid-gap: 0.5rem;
+
+  &:focus,
+  &:hover {
+    filter: brightness(1.25);
+  }
+}
+
+.textlink--underline {
+  & > span {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  &:focus > span,
+  &:hover > span {
+    text-decoration: unset;
   }
 }

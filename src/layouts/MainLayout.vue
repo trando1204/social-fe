@@ -93,8 +93,10 @@
             <q-separator :key="'sep' + index" v-if="menuItem.separator" />
           </template>
         </q-list>
+        <q-btn label="New Post" color="primary" size="md" class="text-center new-post-btn" icon="post_add" />
       </q-scroll-area>
     </q-drawer>
+    <q-drawer show-if-above side="right" class="right-sidebar" :width="400"></q-drawer>
     <q-page-container>
       <q-page>
         <router-view />
@@ -107,9 +109,8 @@
 import { useQuasar } from 'quasar'
 import role from 'src/consts/role'
 import { ref } from 'vue'
-import { mapGetters } from 'vuex'
-import { Notify } from 'quasar'
-import { version } from 'core-js'
+import { mapGetters, mapActions } from 'vuex'
+import { responseError } from 'src/helper/error'
 
 export default {
   data() {
@@ -118,10 +119,40 @@ export default {
       drawer: false,
       menuList: [
         {
-          icon: 'schedule',
+          icon: 'home',
           label: 'Home',
           separator: false,
           to: '/home',
+        },
+        {
+          icon: 'search',
+          label: 'Search',
+          separator: false,
+          to: '/search',
+        },
+        {
+          icon: 'notifications',
+          label: 'Notifications',
+          separator: false,
+          to: '/notifications',
+        },
+        {
+          icon: 'chat',
+          label: 'Chat',
+          separator: false,
+          to: '/chat',
+        },
+        {
+          icon: 'account_circle',
+          label: 'Profile',
+          separator: false,
+          to: '/profile',
+        },
+        {
+          icon: 'settings',
+          label: 'Settings',
+          separator: false,
+          to: '/settings',
         },
       ],
       working: false,
@@ -137,6 +168,20 @@ export default {
       timeSecond: '00',
       runningTimer: {},
     }
+  },
+  created() {
+    console.log('init main')
+    this.$api
+      .get('/pds/get-pds-session')
+      .then((res) => {
+        this.setPdsJwt(res)
+      })
+      .catch((err) => {
+        err.message = err.message + '. Please log in again to create a new pds session.'
+        responseError(err)
+        this.$store.dispatch('user/logOut')
+        this.$router.push({ path: '/login' })
+      })
   },
   setup() {
     const $q = useQuasar()
@@ -163,6 +208,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      setPdsJwt: 'user/setPdsJwt',
+    }),
     shouldDisplayRoute(menuItem) {
       if (menuItem.to == '/report') {
         return this.displayReport

@@ -15,6 +15,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
+    "@atproto/api": "^0.13.33",
     "@quasar/extras": "^1.16.12",
     "@simplewebauthn/browser": "^13.1.0",
     "@vueuse/core": "^11.1.0",

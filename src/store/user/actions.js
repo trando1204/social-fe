@@ -8,7 +8,6 @@ export default {
     try {
       const data = await api.post('/auth/login', payload)
       localStorage.setItem('token', data.token)
-      localStorage.setItem('loginType', data.loginType)
       commit('setUser', data.userInfo)
       commit('setPdsJwt', data.pdsJwt)
       commit('setAuthenticated', true)
@@ -17,10 +16,11 @@ export default {
       return { error }
     }
   },
-
+  async setPdsJwt({ commit }, data) {
+    commit('setPdsJwt', data)
+  },
   async setLogin({ commit }, data) {
     localStorage.setItem('token', data.token)
-    localStorage.setItem('loginType', data.loginType)
     commit('setUser', data.userInfo)
     commit('setPdsJwt', data.pdsJwt)
     commit('setAuthenticated', true)

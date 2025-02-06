@@ -1,0 +1,46 @@
+<template>
+  <div class="feed">
+    <PostItem
+      v-if="feedData.post != null"
+      position="post"
+      :post="feedData.post"
+      @onClickReplier="toggleReplyDisplay"
+      @updateThisPostThread="updateThisPostThread"
+      @removeThisPost="removeThisPost"
+    />
+  </div>
+</template>
+<script>
+import PostItem from './PostItem.vue'
+export default {
+  name: 'feedItem',
+  data() {
+    return {
+      hasLoadButton: false,
+      feedData: {},
+    }
+  },
+  props: {
+    feed: Object,
+  },
+  components: {
+    PostItem,
+  },
+  methods: {
+    fetchFeeds(type) {
+      console.log('fetch feed: ', type)
+    },
+    toggleReplyDisplay() {},
+    updateThisPostThread() {},
+    removeThisPost() {},
+  },
+  watch: {
+    feed: {
+      immediate: true,
+      handler(newVal) {
+        this.feedData = newVal
+      },
+    },
+  },
+}
+</script>
