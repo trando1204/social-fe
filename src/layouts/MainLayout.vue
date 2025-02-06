@@ -170,7 +170,6 @@ export default {
     }
   },
   created() {
-    console.log('init main')
     this.$api
       .get('/pds/get-pds-session')
       .then((res) => {

@@ -13,7 +13,26 @@
       </div>
     </div>
     <div class="tweet-img-wrap">
-      <img src="https://pbs.twimg.com/media/Dgti2h0WkAEUPmT.png" alt="" class="tweet-img" />
+      <!-- 画像 -->
+      <div v-if="images && images.length > 0" class="quad-images" :data-number-of-images="images.length">
+        <div v-for="(image, imageIndex) of images" :key="imageIndex" class="quad-image">
+          <Thumbnail :image="image" :did="postData.author.did" />
+        </div>
+      </div>
+      <div v-if="video != null && video != undefined" class="video-container">
+        <VideoPlayer
+          :playlist="video.playlist"
+          :did="postData.author.did"
+          :cid="video.cid ?? video.video?.ref?.toString()"
+          :poster="video.thumbnail"
+          :style="{ 'aspect-ratio': videoAspectRatio }"
+          @updateVideoType="updateVideoType"
+          @click.stop
+        />
+        <p v-if="videoType === 'blob'" class="video-container__message">video is blob</p>
+        <p v-else-if="videoType === 'none'" class="video-container__message">video is none</p>
+        <HtmlText v-if="video.alt" class="video-container__alt" dir="auto" :text="video.alt" />
+      </div>
     </div>
     <div class="tweet-info-counts">
       <div class="comments">
@@ -104,6 +123,8 @@
 <script>
 import { RichText } from '@atproto/api'
 import HtmlText from '../labels/HtmlText.vue'
+import Thumbnail from '../images/Thumbnail.vue'
+import VideoPlayer from '../images/VideoPlayer.vue'
 export default {
   name: 'postItem',
   data() {
@@ -124,6 +145,10 @@ export default {
       postData: null,
       contentRichText: '',
       segments: [],
+      images: [],
+      video: {},
+      videoAspectRatio: 'unset',
+      videoType: null,
     }
   },
   props: {
@@ -131,6 +156,8 @@ export default {
   },
   components: {
     HtmlText,
+    Thumbnail,
+    VideoPlayer,
   },
   methods: {
     isFocused() {},
@@ -146,6 +173,9 @@ export default {
       } else {
         return Math.round(Math.abs(now - date) / 36e5) + ' hours ago'
       }
+    },
+    updateVideoType(type) {
+      this.videoType = type
     },
     safeURL(uri) {
       try {
@@ -223,64 +253,110 @@ export default {
         }
       }
     },
+    initRichText() {
+      const facets = this.postData.record.facets
+      if (this.postData.value && (facets == null || facets == undefined)) {
+        facets = this.postData.value.facets
+      }
+      const richText = new RichText(
+        {
+          text: this.postData.record.text,
+          facets,
+        },
+        {
+          cleanNewlines: true,
+        }
+      )
+      if (facets == null) {
+        richText.detectFacetsWithoutResolution()
+      }
+      this.contentRichText = richText
+      this.segments = []
+      for (const segment of richText.segments()) {
+        if (segment.isLink()) {
+          const uri = this.transformInternalLink(segment.link.uri ?? '')
+          if (uri == null)
+            this.segments.push({
+              type: 'externalLink',
+              text: segment.text,
+              param: segment.link?.uri ?? '',
+            })
+          else
+            this.segments.push({
+              type: 'internalLink',
+              text: segment.text.startsWith('http') ? uri : segment.text,
+              param: uri,
+            })
+        } else if (segment.isMention())
+          this.segments.push({
+            type: 'mention',
+            text: segment.text,
+            param: segment.mention?.did ?? '',
+          })
+        else if (segment.isTag())
+          this.segments.push({
+            type: 'tag',
+            text: segment.text,
+            param: encodeURIComponent(segment.tag?.tag ?? ''),
+          })
+        else
+          this.segments.push({
+            type: 'text',
+            text: segment.text,
+            param: '',
+          })
+      }
+    },
+    initImages() {
+      if (!this.postData.embed && !this.postData.record.embed) {
+        this.images = []
+        return
+      }
+      this.images = this.postData.embed.images
+      if (!this.images) {
+        this.images = this.postData.record.embed.images
+      }
+    },
+    initVideo() {
+      const embed = this.postData.embed ?? this.postData.record.embed
+      if (!embed || embed == null) {
+        this.video = undefined
+        return
+      }
+      if (embed.$type.startsWith('app.bsky.embed.video')) {
+        this.video = embed
+        return
+      }
+      this.video = embed.media
+      if (!this.video) {
+        this.video = undefined
+        return
+      }
+      this.video = this.video.$type.startsWith('app.bsky.embed.video') ? this.video : undefined
+    },
+    initVideoAspectRatio() {
+      if (
+        !this.video ||
+        this.video.aspectRatio == null ||
+        this.video.aspectRatio.width == null ||
+        this.video.aspectRatio.height == null
+      ) {
+        this.videoAspectRatio = 'unset'
+        return
+      }
+      const aspectHeight = this.video.aspectRatio.height / this.video.aspectRatio.width
+      this.videoAspectRatio = `1 / ${aspectHeight}`
+    },
   },
   watch: {
     post: {
       immediate: true,
       handler(newVal) {
         this.postData = newVal
-        const facets = this.postData.record.facets
-        if (this.postData.value && (facets == null || facets == undefined)) {
-          facets = this.postData.value.facets
-        }
-        const richText = new RichText(
-          {
-            text: this.postData.record.text,
-            facets,
-          },
-          {
-            cleanNewlines: true,
-          }
-        )
-        if (facets == null) {
-          richText.detectFacetsWithoutResolution()
-        }
-        this.contentRichText = richText
-        this.segments = []
-        for (const segment of richText.segments()) {
-          if (segment.isLink()) {
-            const uri = this.transformInternalLink(segment.link.uri ?? '')
-            if (uri == null)
-              this.segments.push({
-                type: 'externalLink',
-                text: segment.text,
-                param: segment.link?.uri ?? '',
-              })
-            else
-              this.segments.push({
-                type: 'internalLink',
-                text: segment.text.startsWith('http') ? uri : segment.text,
-                param: uri,
-              })
-          } else if (segment.isMention())
-            this.segments.push({
-              type: 'mention',
-              text: segment.text,
-              param: segment.mention?.did ?? '',
-            })
-          else if (segment.isTag())
-            this.segments.push({
-              type: 'tag',
-              text: segment.text,
-              param: encodeURIComponent(segment.tag?.tag ?? ''),
-            })
-          else
-            this.segments.push({
-              type: 'text',
-              text: segment.text,
-              param: '',
-            })
-        }
+        this.initRichText()
+        this.initImages()
+        this.initVideo()
+        this.initVideoAspectRatio()
       },
     },
   },
@@ -301,7 +377,7 @@ img {
 }
 
 .tweet-wrap {
-  max-width: 1024px;
+  max-width: 800px;
   background: #fff;
   margin: 0 auto;
   margin-top: 20px;

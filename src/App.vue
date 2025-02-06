@@ -9,8 +9,6 @@ export default {
   name: 'App',
   preFetch({ store, currentRoute, previousRoute, redirect, ssrContext, urlPath, publicPath }) {
     const { authenticated, user } = store.state?.user || {}
-    console.log('authen: ', authenticated)
-    console.log('requireAuth: ', currentRoute.meta.requiresAuth)
     if (!authenticated && currentRoute.meta.requiresAuth) {
       return redirect({ path: '/login' })
     }

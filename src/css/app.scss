@@ -1174,3 +1174,192 @@ a {
     text-decoration: unset;
   }
 }
+
+.quad-images {
+  display: grid;
+  grid-gap: 0.125rem;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  &[data-number-of-images='1'] {
+    & > .quad-image > .thumbnail {
+      border-radius: var(--border-radius-middle);
+    }
+  }
+  &:not([data-number-of-images='1']) {
+    & > .quad-image > .thumbnail {
+      align-items: unset;
+      min-height: 100%;
+      max-height: 100%;
+    }
+  }
+  &[data-number-of-images='2'] {
+    grid-template-areas: 'a b';
+    grid-auto-columns: 0.5fr;
+    grid-auto-rows: 1fr;
+    aspect-ratio: 2 / 1;
+
+    & > .quad-image:nth-child(1) {
+      grid-area: a;
+    }
+    & > .quad-image:nth-child(2) {
+      grid-area: b;
+    }
+  }
+  &[data-number-of-images='3'] {
+    grid-template-areas: 'a b' 'a c';
+    grid-auto-columns: 0.5fr;
+    grid-auto-rows: 0.5fr;
+    aspect-ratio: 3 / 2;
+
+    & > .quad-image:nth-child(1) {
+      grid-area: a;
+    }
+    & > .quad-image:nth-child(2) {
+      grid-area: b;
+    }
+    & > .quad-image:nth-child(3) {
+      grid-area: c;
+    }
+  }
+  &[data-number-of-images='4'] {
+    grid-template-areas: 'a b' 'c d';
+    grid-auto-columns: 0.5fr;
+    grid-auto-rows: 0.5fr;
+    aspect-ratio: 1 / 1;
+
+    & > .quad-image:nth-child(1) {
+      grid-area: a;
+    }
+    & > .quad-image:nth-child(2) {
+      grid-area: b;
+    }
+    & > .quad-image:nth-child(3) {
+      grid-area: c;
+    }
+    & > .quad-image:nth-child(4) {
+      grid-area: d;
+    }
+  }
+
+  & > .quad-image {
+    overflow: hidden;
+
+    & > .thumbnail {
+      border-radius: var(--border-radius-middle);
+
+      & > img {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// SPレイアウト
+$max-width: 1192px;
+$max-width-with-scrollbar: 1222px;
+$menu-max-width: 276px;
+$main-menu-min-width: 4rem;
+$router-view-width: 640px;
+$sp-width: 512px;
+
+@mixin media-sp-layout() {
+  @media not all and (min-width: $sp-width) {
+    @content;
+  }
+}
+@mixin media-not-sp-layout() {
+  @media (min-width: $sp-width) {
+    @content;
+  }
+}
+
+// タブレットレイアウト
+@mixin media-tablet-layout() {
+  @media (max-width: $max-width-with-scrollbar) {
+    @content;
+  }
+}
+
+// サブメニュー非表示レイアウト
+@mixin media-hide-sub-menu-layout() {
+  @media not all and (min-width: 1024px) {
+    @content;
+  }
+}
+
+// サブメニュー表示レイアウト
+@mixin media-show-sub-menu-layout() {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+// フルレイアウト
+@mixin media-full-layout() {
+  @media not all and (max-width: $max-width-with-scrollbar) {
+    @content;
+  }
+}
+
+.quad-images,
+.video-container {
+  grid-area: i;
+  // SPレイアウト時に画像と動画を横幅いっぱいまで広げる
+  @include media-sp-layout() {
+    .post[data-position='post']:not([data-has-child]) > .body > .post__content > & {
+      grid-gap: 1px;
+      margin-left: calc(var(--post-padding) * -1);
+      margin-right: calc(var(--post-padding) * -1);
+      width: calc(100% + var(--post-padding) * 2);
+
+      .thumbnail,
+      video {
+        border: unset;
+        border-radius: unset;
+      }
+
+      & > .html-text {
+        margin-left: var(--post-padding);
+        margin-right: var(--post-padding);
+      }
+    }
+  }
+}
+
+.video-container {
+  position: relative;
+
+  & > video {
+    background-color: rgb(var(--fg-color), 0.125);
+    border: 1px solid rgb(var(--fg-color), 0.25);
+    border-radius: var(--border-radius-middle);
+    overflow: hidden;
+    max-height: 75vh;
+    width: 100%;
+  }
+
+  &__message {
+    background-color: rgb(var(--notice-color), 0.75);
+    border-radius: var(--border-radius-middle);
+    color: white;
+    font-size: 0.75em;
+    font-weight: bold;
+    overflow: hidden;
+    padding: 0.25em 0.5em;
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    max-width: 100%;
+    white-space: nowrap;
+  }
+
+  &__alt {
+    color: rgb(var(--fg-color), 0.75);
+    font-size: 0.875em;
+    line-height: var(--line-height-high);
+    margin-top: 0.5em;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
