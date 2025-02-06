@@ -34,6 +34,16 @@
         <HtmlText v-if="video.alt" class="video-container__alt" dir="auto" :text="video.alt" />
       </div>
     </div>
+    <div v-if="isRepostPost" class="repost">
+      <post-item
+        level="2"
+        :position="position === 'chatMessage' ? 'postInPost' : position === 'slim' ? 'slim' : 'postInPost'"
+        :post="repostData"
+        :hasReplyIcon="repostData.value?.reply != null"
+        :noLink="position === 'chatMessage' ? false : noLink"
+        @click="$emit('click', $event)"
+      />
+    </div>
     <div class="tweet-info-counts">
       <div class="comments">
         <svg
@@ -53,7 +63,7 @@
             d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
           ></path>
         </svg>
-        <div class="comment-count">33</div>
+        <div class="comment-count">{{ postData.replyCount }}</div>
       </div>
 
       <div class="retweets">
@@ -75,7 +85,7 @@
           <polyline points="7 23 3 19 7 15"></polyline>
           <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
         </svg>
-        <div class="retweet-count">397</div>
+        <div class="retweet-count">{{ postData.repostCount }}</div>
       </div>
 
       <div class="likes">
@@ -96,26 +106,16 @@
             d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
           ></path>
         </svg>
-        <div class="likes-count">2.6k</div>
+        <div class="likes-count">{{ postData.likeCount }}</div>
       </div>
 
       <div class="message">
-        <svg
-          class="feather feather-send sc-dnqmqq jxshSx"
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="#5f6368">
+          <path
+            d="m228-240 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T458-480L320-240h-92Zm360 0 92-160q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 23-5.5 42.5T818-480L680-240h-92ZM320-500q25 0 42.5-17.5T380-560q0-25-17.5-42.5T320-620q-25 0-42.5 17.5T260-560q0 25 17.5 42.5T320-500Zm360 0q25 0 42.5-17.5T740-560q0-25-17.5-42.5T680-620q-25 0-42.5 17.5T620-560q0 25 17.5 42.5T680-500Zm0-60Zm-360 0Z"
+          />
         </svg>
+        <div class="quote-count">{{ postData.quoteCount }}</div>
       </div>
     </div>
   </div>
@@ -149,6 +149,7 @@ export default {
       video: {},
       videoAspectRatio: 'unset',
       videoType: null,
+      repostData: null,
     }
   },
   props: {
@@ -158,6 +159,14 @@ export default {
     HtmlText,
     Thumbnail,
     VideoPlayer,
+  },
+  computed: {
+    isRepostPost() {
+      if (!this.postData || !this.postData.embed) {
+        return false
+      }
+      return this.postData.embed.$type.startsWith('app.bsky.embed.record')
+    },
   },
   methods: {
     isFocused() {},
@@ -254,13 +263,22 @@ export default {
       }
     },
     initRichText() {
-      const facets = this.postData.record.facets
-      if (this.postData.value && (facets == null || facets == undefined)) {
-        facets = this.postData.value.facets
+      let facets = this.postData.record ? this.postData.record.facets : undefined
+      let text = this.postData.record ? this.postData.record.text : undefined
+      if (this.postData.value) {
+        if (facets == null || facets == undefined) {
+          facets = this.postData.value.facets
+        }
+        if (text == null || text == undefined) {
+          text = this.postData.value.text
+        }
+      }
+      if (!text && !facets) {
+        return
       }
       const richText = new RichText(
         {
-          text: this.postData.record.text,
+          text: text,
           facets,
         },
         {
@@ -308,17 +326,33 @@ export default {
       }
     },
     initImages() {
-      if (!this.postData.embed && !this.postData.record.embed) {
+      if (!this.postData.embed && !this.postData.embeds && (!this.postData.record || !this.postData.record.embed)) {
         this.images = []
         return
       }
-      this.images = this.postData.embed.images
-      if (!this.images) {
+      if (this.postData.embed && this.postData.embed.images) {
+        this.images = this.postData.embed.images
+      }
+      if ((!this.images || this.images.length == 0) && this.postData.embeds && this.postData.embeds.length > 0) {
+        this.images = this.postData.embeds[0].images
+      }
+      if ((!this.images || this.images.length == 0) && this.postData.embed && this.postData.embed.media) {
+        this.images = this.postData.embed.media.images
+      }
+      if ((!this.images || this.images.length == 0) && this.postData.record && this.postData.record.embed) {
         this.images = this.postData.record.embed.images
+      }
+      if ((!this.images || this.images.length == 0) && this.postData.value && this.postData.value.embed) {
+        this.images = this.postData.value.embed.images
       }
     },
     initVideo() {
-      const embed = this.postData.embed ?? this.postData.record.embed
+      let embed = undefined
+      if (this.postData.embed) {
+        embed = this.postData.embed
+      } else if (this.postData.record) {
+        embed = this.postData.record.embed
+      }
       if (!embed || embed == null) {
         this.video = undefined
         return
@@ -347,6 +381,18 @@ export default {
       const aspectHeight = this.video.aspectRatio.height / this.video.aspectRatio.width
       this.videoAspectRatio = `1 / ${aspectHeight}`
     },
+    initReportData() {
+      if (!this.isRepostPost) {
+        return
+      }
+      this.repostData = this.postData.embed.record
+      if (!this.repostData) {
+        return
+      }
+      if (this.repostData.record) {
+        this.repostData = this.repostData.record
+      }
+    },
   },
   watch: {
     post: {
@@ -357,6 +403,7 @@ export default {
         this.initImages()
         this.initVideo()
         this.initVideoAspectRatio()
+        this.initReportData()
       },
     },
   },
@@ -404,7 +451,7 @@ img {
   margin-top: 5px;
 }
 .tweet-img-wrap {
-  padding-left: 60px;
+  padding-left: 50px;
 }
 
 .tweet-info-counts {
@@ -444,5 +491,30 @@ img {
   .tweet-info-counts div {
     margin-right: 10px;
   }
+}
+.repost {
+  background-color: rgba(62, 176, 234, 0.125);
+  border: 1px solid rgb(62, 176, 234, 0.25);
+  border-radius: 0.25em;
+  margin-left: 60px;
+  margin-top: 10px;
+
+  :not([data-position='slim']) & > .post {
+    padding: 0.75em;
+  }
+  [data-position='slim'] & > .post {
+    padding: 0.5em;
+  }
+
+  &.textlabel {
+    opacity: 0.75;
+    padding: 0.75em;
+  }
+}
+.repost .tweet-wrap {
+  background: transparent;
+}
+.repost .tweet-wrap {
+  padding: 15px 20px;
 }
 </style>
