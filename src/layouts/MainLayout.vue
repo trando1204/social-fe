@@ -99,10 +99,19 @@
     <q-drawer show-if-above side="right" class="right-sidebar" :width="400"></q-drawer>
     <q-page-container>
       <q-page>
-        <router-view :checkPdsSession="checkPdsSession" />
+        <router-view :checkPdsSession="checkPdsSession" @updateImagePopupProps="updateImagePopupProps" />
       </q-page>
     </q-page-container>
   </q-layout>
+  <div class="popup-container">
+    <Transition>
+      <ImagePopup
+        v-if="imagePopupProps.display"
+        :popupData="imagePopupProps"
+        @close="imagePopupProps.display = false"
+      />
+    </Transition>
+  </div>
 </template>
 
 <script>
@@ -111,6 +120,7 @@ import role from 'src/consts/role'
 import { ref } from 'vue'
 import { mapGetters, mapActions } from 'vuex'
 import { responseError } from 'src/helper/error'
+import ImagePopup from 'src/components/popups/ImagePopup.vue'
 
 export default {
   data() {
@@ -168,7 +178,11 @@ export default {
       timeSecond: '00',
       runningTimer: {},
       checkPdsSession: false,
+      imagePopupProps: {},
     }
+  },
+  components: {
+    ImagePopup,
   },
   async beforeMount() {
     await this.handlerPdsSession()
@@ -207,6 +221,9 @@ export default {
         return this.displayReport
       }
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
+    },
+    updateImagePopupProps(updateProp) {
+      this.imagePopupProps = updateProp
     },
     logOut() {
       this.$store.dispatch('user/logOut')

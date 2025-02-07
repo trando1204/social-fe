@@ -1,5 +1,5 @@
 <template>
-  <FeedList :feeds="timelines"></FeedList>
+  <FeedList :feeds="timelines" @updateImagePopupProps="updateImagePopupProps"></FeedList>
 </template>
 
 <script>
@@ -20,6 +20,11 @@ export default {
       timelines: [],
       cursor: '',
     }
+  },
+  methods: {
+    updateImagePopupProps(updateProp) {
+      this.$emit('updateImagePopupProps', updateProp)
+    },
   },
   watch: {
     checkPdsSession: {

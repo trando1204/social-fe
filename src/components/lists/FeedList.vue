@@ -3,7 +3,12 @@
     <LoadButton v-if="hasLoadButton" direction="new" @activate="fetchFeeds('new')" />
     <div class="feeds">
       <template v-for="feed of feedArray" :key="feed.cid">
-        <FeedItem :feed="feed" @updateThisPostThread="updateThisPostThread" @removeThisPost="removeThisPost" />
+        <FeedItem
+          :feed="feed"
+          @updateImagePopupProps="updateImagePopupProps"
+          @updateThisPostThread="updateThisPostThread"
+          @removeThisPost="removeThisPost"
+        />
       </template>
     </div>
     <LoadButton v-if="hasLoadButton" direction="old" @activate="fetchFeeds('old')" />
@@ -33,6 +38,9 @@ export default {
     },
     updateThisPostThread() {},
     removeThisPost() {},
+    updateImagePopupProps(updateProp) {
+      this.$emit('updateImagePopupProps', updateProp)
+    },
   },
   watch: {
     feeds: {

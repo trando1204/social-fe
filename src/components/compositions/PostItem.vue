@@ -13,10 +13,9 @@
       </div>
     </div>
     <div class="tweet-img-wrap">
-      <!-- 画像 -->
       <div v-if="images && images.length > 0" class="quad-images" :data-number-of-images="images.length">
         <div v-for="(image, imageIndex) of images" :key="imageIndex" class="quad-image">
-          <Thumbnail :image="image" :did="postData.author.did" />
+          <Thumbnail :image="image" :did="postData.author.did" @click.stop="openImagePopup(imageIndex)" />
         </div>
       </div>
       <div v-if="video != null && video != undefined" class="video-container">
@@ -150,6 +149,7 @@ export default {
       videoAspectRatio: 'unset',
       videoType: null,
       repostData: null,
+      imagePopupProps: {},
     }
   },
   props: {
@@ -175,12 +175,20 @@ export default {
     getDisplayTime(time) {
       const date = new Date(Date.parse(time))
       const now = new Date()
-      if (now.getTime() - date.getTime() > 86400000) {
+      const dateInt = date.getTime()
+      const nowInt = now.getTime()
+      // if less than 1 hour
+      if (nowInt - dateInt <= 3600000) {
+        const minuteNum = Math.round(Math.abs(nowInt - dateInt) / 60000)
+        return minuteNum + 'm ago'
+      }
+      if (nowInt - dateInt > 86400000) {
         return date.getFullYear() == now.getFullYear()
           ? date.toLocaleString('default', { day: 'numeric', month: 'short' })
           : date.toLocaleString('default', { year: 'numeric', day: 'numeric', month: 'short' })
       } else {
-        return Math.round(Math.abs(now - date) / 36e5) + ' hours ago'
+        const hourNum = Math.round(Math.abs(now - date) / 36e5)
+        return hourNum + ' ' + (hourNum < 2 ? 'hour' : 'hours') + ' ago'
       }
     },
     updateVideoType(type) {
@@ -393,6 +401,29 @@ export default {
         this.repostData = this.repostData.record
       }
     },
+    openImagePopup(imageIndex) {
+      if (this.images[imageIndex].fullsize == null && this.images[imageIndex].image == null) {
+        return
+      }
+      this.imagePopupProps.did = this.postData.author.did
+      this.imagePopupProps.images = this.images.map((image) => {
+        const result = {
+          smallUri: image.thumb ?? '/img/void.png',
+          largeUri: image.fullsize ?? '/img/void.png',
+        }
+        if (
+          image.fullsize == null ||
+          (image.image?.mimeType !== 'image/jpeg' && image.image?.mimeType !== 'image/png')
+        ) {
+          result.blob = image.image
+        }
+        return result
+      })
+      this.imagePopupProps.alts = this.images.map((image) => image.alt)
+      this.imagePopupProps.index = imageIndex
+      this.imagePopupProps.display = true
+      this.$emit('updateImagePopupProps', this.imagePopupProps)
+    },
   },
   watch: {
     post: {
@@ -424,9 +455,8 @@ img {
 }
 
 .tweet-wrap {
-  max-width: 800px;
+  max-width: 650px;
   background: #fff;
-  margin: 0 auto;
   margin-top: 20px;
   border-radius: 3px;
   padding: 30px;

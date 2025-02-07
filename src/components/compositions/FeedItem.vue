@@ -7,6 +7,7 @@
       @onClickReplier="toggleReplyDisplay"
       @updateThisPostThread="updateThisPostThread"
       @removeThisPost="removeThisPost"
+      @updateImagePopupProps="updateImagePopupProps"
     />
   </div>
 </template>
@@ -33,6 +34,9 @@ export default {
     toggleReplyDisplay() {},
     updateThisPostThread() {},
     removeThisPost() {},
+    updateImagePopupProps(updateProp) {
+      this.$emit('updateImagePopupProps', updateProp)
+    },
   },
   watch: {
     feed: {
