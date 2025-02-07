@@ -12,22 +12,32 @@ export default {
   components: {
     FeedList,
   },
+  props: {
+    checkPdsSession: Boolean,
+  },
   data() {
     return {
       timelines: [],
       cursor: '',
     }
   },
-  created() {
-    this.$api
-      .get('/pds/get-timeline')
-      .then((res) => {
-        this.cursor = res.cursor
-        this.timelines = res.feed
-      })
-      .catch((err) => {
-        responseError(err)
-      })
+  watch: {
+    checkPdsSession: {
+      immediate: true,
+      handler(checked) {
+        if (checked) {
+          this.$api
+            .get('/pds/get-timeline')
+            .then((res) => {
+              this.cursor = res.cursor
+              this.timelines = res.feed
+            })
+            .catch((err) => {
+              responseError(err)
+            })
+        }
+      },
+    },
   },
 }
 </script>

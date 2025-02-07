@@ -99,7 +99,7 @@
     <q-drawer show-if-above side="right" class="right-sidebar" :width="400"></q-drawer>
     <q-page-container>
       <q-page>
-        <router-view />
+        <router-view :checkPdsSession="checkPdsSession" />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -167,20 +167,12 @@ export default {
       timeMin: '00',
       timeSecond: '00',
       runningTimer: {},
+      checkPdsSession: false,
     }
   },
-  created() {
-    this.$api
-      .get('/pds/get-pds-session')
-      .then((res) => {
-        this.setPdsJwt(res)
-      })
-      .catch((err) => {
-        err.message = err.message + '. Please log in again to create a new pds session.'
-        responseError(err)
-        this.$store.dispatch('user/logOut')
-        this.$router.push({ path: '/login' })
-      })
+  async beforeMount() {
+    await this.handlerPdsSession()
+    this.checkPdsSession = true
   },
   setup() {
     const $q = useQuasar()
@@ -230,6 +222,19 @@ export default {
         /^\s*$/.test(str) ||
         str.replace(/\s/g, '') === ''
       )
+    },
+    async handlerPdsSession() {
+      await this.$api
+        .get('/pds/get-pds-session')
+        .then((res) => {
+          this.setPdsJwt(res)
+        })
+        .catch((err) => {
+          err.message = err.message + '. Please log in again to create a new pds session.'
+          responseError(err)
+          this.$store.dispatch('user/logOut')
+          this.$router.push({ path: '/login' })
+        })
     },
   },
   watch: {
