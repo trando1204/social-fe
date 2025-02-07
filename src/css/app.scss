@@ -1065,6 +1065,9 @@ a {
   left: 50px;
   z-index: 1000;
 }
+.p-fixed {
+  position: fixed;
+}
 .status-column {
   padding-left: 100px;
 }
@@ -1531,4 +1534,9 @@ $sp-width: 512px;
 
 .popup-btn {
   color: #b5b5b5;
+}
+
+.q-drawer--left,
+.q-drawer--right {
+  position: fixed !important;
 }
