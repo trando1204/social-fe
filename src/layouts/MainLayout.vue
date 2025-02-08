@@ -1,6 +1,6 @@
 <template>
   <q-layout class="main-layout" view="hHh lpR fFf">
-    <q-header elevated class="bg-primary text-white shadow-4">
+    <q-header elevated class="bg-white text-black main-header p-fixed">
       <q-toolbar class="GNL__toolbar">
         <q-btn
           flat
@@ -11,7 +11,7 @@
           icon="menu"
         />
         <q-toolbar-title>
-          <q-avatar class="q-mr-sm"><img src="../assets/social.png" /></q-avatar>Social Website
+          <q-avatar class="q-mr-sm"><img src="../assets/social.png" /></q-avatar>SocialAT
         </q-toolbar-title>
         <q-btn flat no-caps>
           <q-item class="q-pa-none">
@@ -40,61 +40,76 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-    <q-drawer show-if-above v-model="leftDrawerOpen" :mini="miniState" side="left" class="left-sidebar" :width="280">
-      <q-list padding class="text-grey-2">
-        <template v-for="(menuItem, index) in menuList">
-          <div
-            class="row center-row q-my-sm separator-full-display"
-            :key="'separator_' + index"
-            v-if="menuItem.label === 'User Management' && isAdmin"
-          >
-            <q-separator class="width-40" />
-            <span class="width-20 text-weight-medium q-pl-sm">Admin</span>
-            <q-separator class="width-40" />
-          </div>
-          <q-separator
-            class="separator-mini-display"
-            :key="'sepa_no_text_' + index"
-            v-if="menuItem.label === 'User Management' && isAdmin"
-          />
-          <q-item
-            :key="index"
-            clickable
-            :to="menuItem.to"
-            active-class="bg-cyan-2 sidebar-active-item"
-            class="GNL__drawer-item sidebar-item"
-            v-if="shouldDisplayRoute(menuItem)"
-            v-ripple
-          >
-            <q-item-section avatar>
-              <q-icon size="md" class="sidebar-icon" :name="'o_' + menuItem.icon" />
-            </q-item-section>
-            <q-item-section>
-              <span class="row sidebar-text justify-between"
-                >{{ menuItem.label }}
-                <q-badge
-                  :label="approvalCount"
-                  style="font-size: 12px; height: 20px"
-                  v-if="menuItem.label === 'Pending Approvals'"
-                >
-                  <q-tooltip>Number of invoices that need to be approved</q-tooltip>
-                </q-badge>
-                <q-badge
-                  :label="unpaidCount"
-                  style="font-size: 12px; height: 20px"
-                  v-if="menuItem.label === 'Pay' && unpaidCount > 0"
-                >
-                  <q-tooltip>Number of unpaid invoices</q-tooltip>
-                </q-badge></span
+    <div class="p-relative sidebar-div">
+      <div class="p-absolute">
+        <q-drawer
+          show-if-above
+          v-model="leftDrawerOpen"
+          :mini="miniState"
+          side="left"
+          class="left-sidebar"
+          :width="230"
+        >
+          <q-list padding class="text-grey-2">
+            <template v-for="(menuItem, index) in menuList">
+              <div
+                class="row center-row q-my-sm separator-full-display"
+                :key="'separator_' + index"
+                v-if="menuItem.label === 'User Management' && isAdmin"
               >
-            </q-item-section>
-          </q-item>
-          <q-separator :key="'sep' + index" v-if="menuItem.separator" />
-        </template>
-      </q-list>
-      <q-btn label="New Post" color="primary" size="md" class="text-center new-post-btn" icon="post_add" />
-    </q-drawer>
-    <q-drawer show-if-above side="right" class="right-sidebar" :width="400"></q-drawer>
+                <q-separator class="width-40" />
+                <span class="width-20 text-weight-medium q-pl-sm">Admin</span>
+                <q-separator class="width-40" />
+              </div>
+              <q-separator
+                class="separator-mini-display"
+                :key="'sepa_no_text_' + index"
+                v-if="menuItem.label === 'User Management' && isAdmin"
+              />
+              <q-item
+                :key="index"
+                clickable
+                :to="menuItem.to"
+                active-class="bg-cyan-2 sidebar-active-item"
+                class="GNL__drawer-item sidebar-item"
+                v-if="shouldDisplayRoute(menuItem)"
+                v-ripple
+              >
+                <q-item-section avatar>
+                  <q-icon size="md" class="sidebar-icon" :name="'o_' + menuItem.icon" />
+                </q-item-section>
+                <q-item-section>
+                  <span class="row sidebar-text justify-between"
+                    >{{ menuItem.label }}
+                    <q-badge
+                      :label="approvalCount"
+                      style="font-size: 12px; height: 20px"
+                      v-if="menuItem.label === 'Pending Approvals'"
+                    >
+                      <q-tooltip>Number of invoices that need to be approved</q-tooltip>
+                    </q-badge>
+                    <q-badge
+                      :label="unpaidCount"
+                      style="font-size: 12px; height: 20px"
+                      v-if="menuItem.label === 'Pay' && unpaidCount > 0"
+                    >
+                      <q-tooltip>Number of unpaid invoices</q-tooltip>
+                    </q-badge></span
+                  >
+                </q-item-section>
+              </q-item>
+              <q-separator :key="'sep' + index" v-if="menuItem.separator" />
+            </template>
+          </q-list>
+          <q-btn label="New Post" color="primary" size="md" class="text-center new-post-btn" icon="post_add" />
+        </q-drawer>
+      </div>
+    </div>
+    <div class="p-relative float-right sidebar-div">
+      <div class="p-absolute">
+        <q-drawer show-if-above side="right" class="right-sidebar" :width="230"> </q-drawer>
+      </div>
+    </div>
     <q-page-container>
       <q-page>
         <router-view :checkPdsSession="checkPdsSession" @updateImagePopupProps="updateImagePopupProps" />

@@ -24,7 +24,7 @@
                               outlined
                               v-model="username"
                               label="Username"
-                              class="has-icon-input"
+                              class="has-icon-input login-input"
                               stack-label
                               @focus="onUsernameFocus"
                               @blur="onUsernameBlur"
@@ -48,12 +48,21 @@
                         v-model="password"
                         type="password"
                         label="Password"
+                        class="login-input"
                         stack-label
                         :dense="dense"
                       />
                     </div>
                     <div class="d-flex justify-content-center q-mt-sm">
-                      <q-input outlined v-model="email" label="Email" :rules="emailRules" stack-label :dense="dense" />
+                      <q-input
+                        outlined
+                        v-model="email"
+                        class="login-input"
+                        label="Email"
+                        :rules="emailRules"
+                        stack-label
+                        :dense="dense"
+                      />
                     </div>
                     <div class="d-flex justify-content-center q-mb-md q-mt-sm">
                       <q-btn
@@ -74,14 +83,14 @@
                             size="sm"
                             class="q-mr-sm blue-link"
                           />
-                          <a class="link blue-link" @click.stop.prevent="signupWithPassword">{{
+                          <a class="login-link blue-link" @click.stop.prevent="signupWithPassword">{{
                             usePassword ? 'Signup With Passkey' : 'Signup With Password'
                           }}</a>
                         </div>
                         <div class="text-center">
                           <q-icon name="undo" size="sm" class="q-mr-sm blue-link" />
                           <router-link
-                            class="link blue-link"
+                            class="login-link blue-link"
                             :to="usePassword ? '/login?type=password' : '/login?type=passkey'"
                             >Back to login</router-link
                           >

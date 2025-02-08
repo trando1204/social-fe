@@ -109,7 +109,6 @@ p {
   padding-bottom: 0px;
 }
 .header-text {
-  color: #ffffff;
   opacity: 80%;
   text-transform: none;
 }
@@ -142,7 +141,10 @@ p {
   }
 }
 .left-sidebar {
-  box-shadow: 7px 0px 60px rgba(0, 0, 0, 0.05);
+  border-right: 1px solid #e4e4e4;
+}
+.right-sidebar {
+  border-left: 1px solid #e4e4e4;
 }
 .q-table tbody tr:nth-child(odd) {
   background-color: #f7fbfc;
@@ -1536,7 +1538,47 @@ $sp-width: 512px;
   color: #b5b5b5;
 }
 
-.q-drawer--left,
-.q-drawer--right {
-  position: fixed !important;
+.main-header .q-layout__shadow:after {
+  box-shadow: none;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.p-absolute {
+  position: absolute;
+}
+.p-relative {
+  position: relative;
+}
+
+.main-layout {
+  margin: auto;
+  position: relative;
+  max-width: 1192px;
+  min-height: 100vh;
+}
+
+.main-header {
+  max-width: 1192px;
+  margin: auto;
+}
+
+.sidebar-div .q-drawer-container {
+  position: fixed;
+  height: 100%;
+}
+
+.sidebar-div .q-drawer--right {
+  position: absolute;
+}
+
+.float-right {
+  float: right;
+}
+
+.login-input {
+  min-width: 250px;
+}
+
+.login-link {
+  font-size: 15px;
 }

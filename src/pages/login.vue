@@ -22,6 +22,7 @@
                           outlined
                           v-model="username"
                           label="Username"
+                          class="login-input"
                           stack-label
                           :dense="dense"
                           :rules="usernameRules"
@@ -33,6 +34,7 @@
                           v-model="password"
                           type="password"
                           label="Password"
+                          class="login-input"
                           stack-label
                           :dense="dense"
                           :rules="passwordRules"
@@ -57,14 +59,14 @@
                               size="sm"
                               class="q-mr-sm blue-link"
                             />
-                            <a class="link blue-link" @click.stop.prevent="loginWithPassword">{{
+                            <a class="login-link blue-link" @click.stop.prevent="loginWithPassword">{{
                               usePassword ? 'Login With Passkey' : 'Login With Password'
                             }}</a>
                           </div>
                           <div class="text-center">
                             <q-icon name="app_registration" size="sm" class="q-mr-sm blue-link" />
                             <router-link
-                              class="link blue-link"
+                              class="login-link blue-link"
                               :to="usePassword ? '/register?type=password' : '/register?type=passkey'"
                               >Signup</router-link
                             >
