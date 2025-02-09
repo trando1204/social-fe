@@ -43,6 +43,14 @@
         @click="$emit('click', $event)"
       />
     </div>
+    <LinkCard
+      v-if="hasLinkCard"
+      :external="linkCard"
+      layout="vertical"
+      :displayImage="true"
+      :noLink="false"
+      :noEmbedded="false"
+    />
     <div class="tweet-info-counts">
       <div class="comments">
         <svg
@@ -124,6 +132,7 @@ import { RichText } from '@atproto/api'
 import HtmlText from '../labels/HtmlText.vue'
 import Thumbnail from '../images/Thumbnail.vue'
 import VideoPlayer from '../images/VideoPlayer.vue'
+import LinkCard from '../cards/LinkCard.vue'
 export default {
   name: 'postItem',
   data() {
@@ -150,6 +159,7 @@ export default {
       videoType: null,
       repostData: null,
       imagePopupProps: {},
+      linkCard: null,
     }
   },
   props: {
@@ -159,6 +169,7 @@ export default {
     HtmlText,
     Thumbnail,
     VideoPlayer,
+    LinkCard,
   },
   computed: {
     isRepostPost() {
@@ -166,6 +177,9 @@ export default {
         return false
       }
       return this.postData.embed.$type.startsWith('app.bsky.embed.record')
+    },
+    hasLinkCard() {
+      return this.linkCard != null && this.position !== 'slim'
     },
   },
   methods: {
@@ -424,6 +438,16 @@ export default {
       this.imagePopupProps.display = true
       this.$emit('updateImagePopupProps', this.imagePopupProps)
     },
+    initLinkCard() {
+      this.linkCard = this.postData.embed
+        ? this.postData.embed.external
+        : this.postData.record
+        ? this.postData.record.embed
+          ? this.postData.record.embed.external
+          : null
+        : null
+      console.log('check link card: ', this.linkCard)
+    },
   },
   watch: {
     post: {
@@ -435,6 +459,7 @@ export default {
         this.initVideo()
         this.initVideoAspectRatio()
         this.initReportData()
+        this.initLinkCard()
       },
     },
   },
