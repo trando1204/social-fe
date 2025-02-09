@@ -273,7 +273,6 @@ export default {
       immediate: true,
       handler(newVal) {
         this.externalData = newVal
-        console.log('check external: ', JSON.stringify(newVal))
         this.getEmbeddedContentId()
       },
     },

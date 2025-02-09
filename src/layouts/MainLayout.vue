@@ -1,45 +1,5 @@
 <template>
   <q-layout class="main-layout" view="hHh lpR fFf">
-    <q-header elevated class="bg-white text-black main-header p-fixed">
-      <q-toolbar class="GNL__toolbar">
-        <q-btn
-          flat
-          dense
-          round
-          @click="$q.screen.gt.sm ? toogleMiniState() : toggleLeftDrawer()"
-          aria-label="Menu"
-          icon="menu"
-        />
-        <q-toolbar-title>
-          <q-avatar class="q-mr-sm"><img src="../assets/social.png" /></q-avatar>SocialAT
-        </q-toolbar-title>
-        <q-btn flat no-caps>
-          <q-item class="q-pa-none">
-            <q-item-section avatar>
-              <q-avatar>
-                <img src="../assets/user-icon.png" />
-              </q-avatar>
-            </q-item-section>
-
-            <q-item-section class="text-left" no-caps>
-              <q-item-label lines="1" class="text-size-14 header-text">
-                {{ user.username }}
-              </q-item-label>
-              <q-item-label v-if="user.displayName" lines="2">
-                <span class="text-size-12 header-text">{{ user.username }}</span>
-              </q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-menu transition-show="jump-down" transition-hide="jump-up">
-            <q-list style="min-width: 100px">
-              <q-item @click="logOut" clickable v-close-popup>
-                <q-item-section>Log out</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
-      </q-toolbar>
-    </q-header>
     <div class="p-relative sidebar-div">
       <div class="p-absolute">
         <q-drawer
@@ -50,6 +10,35 @@
           class="left-sidebar"
           :width="230"
         >
+          <div class="d-flex justify-content-center q-mt-md">
+            <q-btn flat no-caps>
+              <div>
+                <div class="d-flex justify-content-center q-mb-sm">
+                  <q-avatar>
+                    <img src="../assets/user-icon.png" />
+                  </q-avatar>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <q-item-label lines="1" class="text-size-14 header-text">
+                    {{ user.username }}
+                  </q-item-label>
+                  <q-item-label v-if="user.displayName" lines="2">
+                    <span class="text-size-12 header-text">{{ user.username }}</span>
+                  </q-item-label>
+                </div>
+                <div class="d-flex justify-content-center">
+                  <q-item-label lines="1" class="text-size-13 avatar-handle"> {{ pdsJwt.handle }} </q-item-label>
+                </div>
+              </div>
+              <q-menu transition-show="jump-down" transition-hide="jump-up">
+                <q-list style="min-width: 100px">
+                  <q-item @click="logOut" clickable v-close-popup>
+                    <q-item-section>Log out</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+          </div>
           <q-list padding class="text-grey-2">
             <template v-for="(menuItem, index) in menuList">
               <div
@@ -192,6 +181,7 @@ export default {
       runningTimer: {},
       checkPdsSession: false,
       imagePopupProps: {},
+      pdsJwt: {},
     }
   },
   components: {
@@ -258,6 +248,7 @@ export default {
         .get('/pds/get-pds-session')
         .then((res) => {
           this.setPdsJwt(res)
+          this.pdsJwt = res
         })
         .catch((err) => {
           err.message = err.message + '. Please log in again to create a new pds session.'

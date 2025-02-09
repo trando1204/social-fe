@@ -45,7 +45,13 @@ export default {
       return error
     }
   },
-
+  async getPdsJwt({ commit }) {
+    const pdsJwtStr = localStorage.getItem('pdsJwt')
+    if (!pdsJwtStr) {
+      return {}
+    }
+    return JSON.parse(pdsJwtStr)
+  },
   // list actions for using system
   async getUser({ commit }) {
     return api

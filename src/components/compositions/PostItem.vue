@@ -446,7 +446,6 @@ export default {
           ? this.postData.record.embed.external
           : null
         : null
-      console.log('check link card: ', this.linkCard)
     },
   },
   watch: {
@@ -482,7 +481,6 @@ img {
 .tweet-wrap {
   max-width: 650px;
   background: #fff;
-  margin-top: 20px;
   border-radius: 3px;
   padding: 30px;
   border-bottom: 1px solid #e6ecf0;
